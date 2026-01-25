@@ -66,16 +66,20 @@ set "OUTPUT_FILE=%~dpn1.%EXT%"
 
 echo 変換中: "%INPUT_FILE%"
 
+:: 短いパス名（8.3形式）を取得して特殊文字問題を回避
+for %%A in ("%INPUT_FILE%") do set "SHORT_INPUT=%%~sA"
+for %%B in ("%OUTPUT_FILE%") do set "SHORT_OUTPUT=%%~sB"
 
-:: ffmpegコマンド実行
-ffmpeg -i "%INPUT_FILE%" %FFMPEG_ARGS% "%OUTPUT_FILE%" -y -hide_banner -loglevel error
+:: ffmpegコマンド実行（短いパスを使用）
+ffmpeg -i "!SHORT_INPUT!" %FFMPEG_ARGS% "!SHORT_OUTPUT!" -y 2>&1
 
 if !errorlevel! neq 0 (
     echo [エラー] 変換に失敗しました: "%INPUT_FILE%"
-    echo FFmpegが見つからないか、ファイルが破損している可能性があります。
+    echo 別のフォーマットまたはFFmpegの環境設定を確認してください。
+    echo.
 ) else (
     echo [完了] 保存先: "%OUTPUT_FILE%"
-)
+    echo.
 
 :: 次のファイルへ（シフト）
 shift

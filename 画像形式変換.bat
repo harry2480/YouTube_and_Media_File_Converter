@@ -5,11 +5,19 @@ chcp 65001 >nul
 :: ImageMagickがインストールされているか確認
 where magick >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [エラー] ImageMagickが見つかりません。
-    echo ImageMagickをインストールしてから再実行してください。
-    echo https://imagemagick.org/script/download.php
-    pause
-    exit /b
+    if exist "%~dp0ImageMagick\magick.exe" (
+        set "MAGICK_EXE=%~dp0ImageMagick\magick.exe"
+        set "MAGICK_CONFIGURE_PATH=%~dp0ImageMagick"
+        echo [i] Using local ImageMagick: %MAGICK_EXE%
+    ) else (
+        echo [エラー] ImageMagickが見つかりません。
+        echo magick.exe を PATH に入れるか、ImageMagick フォルダに置いてください。
+        echo https://imagemagick.org/script/download.php
+        pause
+        exit /b
+    )
+) else (
+    set "MAGICK_EXE=magick"
 )
 
 :: ファイルがドラッグ＆ドロップされているか確認
@@ -66,7 +74,7 @@ echo 処理中: "%~nx1" -^> "%~n1%EXT%"
 
 :: ImageMagickによる変換実行
 :: SVGへの変換などの特殊ケースも自動処理されます
-magick "%INPUT_FILE%" "%OUTPUT_FILE%"
+"%MAGICK_EXE%" "%INPUT_FILE%" "%OUTPUT_FILE%"
 
 if %errorlevel% neq 0 (
     echo [失敗] 変換できませんでした: "%~nx1"
